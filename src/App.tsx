@@ -1,7 +1,10 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme, lightTheme } from './theme';
 import { createGlobalStyle } from 'styled-components';
-
 import KanbanBoard from './KanbanBoard';
+import { isDarkAtom } from './atoms';
+import { useRecoilValue } from 'recoil';
 
 const GlobalStyle = createGlobalStyle`
 body{
@@ -40,6 +43,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
 	line-height: 1;
+	color: ${(props) => props.theme.textColor};
 }
 ol, ul {
 	list-style: none;
@@ -63,10 +67,13 @@ a{
 `;
 
 function App() {
+  const isDark = useRecoilValue(isDarkAtom);
   return (
     <>
-      <GlobalStyle />
-      <KanbanBoard />
+      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        <GlobalStyle />
+        <KanbanBoard />
+      </ThemeProvider>
     </>
   );
 }

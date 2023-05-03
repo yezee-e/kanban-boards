@@ -3,36 +3,61 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import { GrUploadOption } from 'react-icons/gr';
-import { BsMicFill, BsFillMicMuteFill } from 'react-icons/bs';
+import { MdLibraryAdd } from 'react-icons/md';
+import { BsMicFill, BsFillMicMuteFill, BsFillSunFill } from 'react-icons/bs';
+import { FaMoon } from 'react-icons/fa';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useRecoilState } from 'recoil';
-import { ITodo, todoState } from './atoms';
+import { isDarkAtom, todoState } from './atoms';
 import Board from './components/Board';
 
-const Logo = styled.div`
+const Container = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  img {
-    width: 400px;
-    height: 200px;
-  }
+  height: 100vh;
+  flex-direction: column;
+  margin: 20px 40px;
+`;
+
+const Logo = styled.div`
+  font-size: 50px;
+  font-weight: 700;
+`;
+const ToggleBtn = styled.button`
+  background-color: inherit;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: ${(props) => props.theme.textColor};
 `;
 const Wrapper = styled.div`
-  align-items: center;
+  flex-direction: column;
   display: flex;
-  max-width: 680px;
-  width: 100%;
-  margin: 0 auto;
   justify-content: center;
-  height: 100vh;
+`;
+const Title = styled.div`
+  display: flex;
+  margin-top: 30px;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+`;
+const Function = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  div {
+    cursor: pointer;
+    color: ${(props) => props.theme.textColor};
+    font-size: 25px;
+  }
 `;
 
 const Boards = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  display: flex;
+  width: 100vw;
+  gap: 15px;
 `;
 
 const InputArea = styled.form`
@@ -42,10 +67,9 @@ const InputArea = styled.form`
   flex-direction: center;
   align-items: center;
   input {
-    width: 50%;
+    width: 40%;
     margin-right: 20px;
-    border: none;
-    border-bottom: 1px solid black;
+    border: 3px solid gray;
     padding: 10px;
   }
   input:focus {
@@ -58,6 +82,8 @@ const InputArea = styled.form`
 `;
 const BtnIcon = styled.div`
   display: flex;
+  position: relative;
+  right: 130px;
   gap: 10px;
   align-items: center;
   button {
@@ -65,6 +91,10 @@ const BtnIcon = styled.div`
     border: none;
     font-size: 20px;
     margin-left: 20px;
+    cursor: pointer;
+    div {
+      cursor: pointer;
+    }
   }
 `;
 
@@ -73,9 +103,14 @@ interface IForm {
 }
 
 function KanbanBoard() {
+  const [isDark, setIsDark] = useRecoilState(isDarkAtom);
   const [todos, setTodos] = useRecoilState(todoState);
   const [toggle, setToggle] = useState(false);
-  const { register, handleSubmit, setValue } = useForm<IForm>();
+  const { register, handleSubmit, setValue, getValues } = useForm<IForm>();
+
+  const toggleDarkAtom = () => {
+    setIsDark((prev) => !prev);
+  };
 
   const onSubmit = ({ todo }: IForm) => {
     const newTodo = {
@@ -85,14 +120,55 @@ function KanbanBoard() {
     setTodos((allBoards) => {
       return {
         ...allBoards,
-        TO_DO: [newTodo, ...allBoards['TO_DO']],
+        할일: [newTodo, ...allBoards['할일']],
       };
     });
     setValue('todo', '');
   };
 
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recognition = new SpeechRecognition();
+  recognition.interimResults = true;
+  recognition.lang = 'ko-KR';
+  recognition.onresult = function (e) {
+    const record = e.results[0][0].transcript;
+    let value = getValues('todo');
+    value = record;
+    setValue('todo', value);
+  };
+  if (!SpeechRecognition) {
+    alert('현재 브라우저는 사용이 불가능합니다.');
+  }
+  if (SpeechRecognition) {
+    if (toggle) {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+  }
+
+  const addBoard = () => {
+    const name = window.prompt('새 보드의 이름을 입력해주세요.')?.trim();
+
+    if (name !== null && name !== undefined) {
+      if (name === '') {
+        alert('이름을 입력해주세요.');
+        return;
+      }
+      setTodos((allBoards) => {
+        return {
+          ...allBoards,
+          [name]: [],
+        };
+      });
+    }
+  };
+
   const onDragEnd = ({ draggableId, destination, source }: DropResult) => {
     if (!destination) return;
+
     //같은 보드에서의 움직임
     if (destination?.droppableId === source.droppableId) {
       setTodos((allBoards) => {
@@ -124,25 +200,25 @@ function KanbanBoard() {
     }
   };
   return (
-    <>
-      <Logo>
-        <img src='pic/logo.png' alt='logo' />
-      </Logo>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Wrapper>
-          <Boards>
-            {Object.keys(todos).map((boardId) => (
-              <Board boardId={boardId} todos={todos[boardId]} key={boardId} />
-            ))}
-          </Boards>
-        </Wrapper>
-      </DragDropContext>
+    <Container>
+      <Title>
+        <Logo>kanban-board</Logo>
 
+        <Function>
+          <ToggleBtn onClick={toggleDarkAtom}>
+            {isDark ? <FaMoon /> : <BsFillSunFill />}
+          </ToggleBtn>
+          <div onClick={addBoard}>
+            <MdLibraryAdd />
+          </div>
+        </Function>
+      </Title>
       <InputArea onSubmit={handleSubmit(onSubmit)}>
         <input
           {...register('todo', { required: 'Please wite a todo' })}
           type='text'
           placeholder='write a to do'
+          autoComplete='off'
         />
         <BtnIcon>
           <button>
@@ -153,7 +229,21 @@ function KanbanBoard() {
           </div>
         </BtnIcon>
       </InputArea>
-    </>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Wrapper>
+          <Boards>
+            {Object.keys(todos).map((boardId, index) => (
+              <Board
+                boardId={boardId}
+                todos={todos[boardId]}
+                key={boardId}
+                boardIndex={index}
+              />
+            ))}
+          </Boards>
+        </Wrapper>
+      </DragDropContext>
+    </Container>
   );
 }
 

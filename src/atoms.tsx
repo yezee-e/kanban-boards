@@ -9,15 +9,29 @@ interface IToDoState {
   [key: string]: ITodo[];
 }
 
+const localStorageEffect =
+  (key: string) =>
+  ({ setSelf, onSet }: any) => {
+    const savedValue = localStorage.getItem(key);
+    if (savedValue !== null) {
+      setSelf(JSON.parse(savedValue));
+    }
+    onSet((newValue: ITodo) => {
+      localStorage.setItem(key, JSON.stringify(newValue));
+    });
+  };
+
 export const todoState = atom<IToDoState>({
   key: 'mock',
   default: {
-    TO_DO: [
-      { id: 1, text: 'hello' },
-      { id: 2, text: 'hi' },
-      { id: 3, text: 'nice' },
-    ],
-    IN_PROGRESS: [],
-    COMPLETE: [],
+    할일: [],
+    하는중: [],
+    끝: [],
   },
+  effects: [localStorageEffect('kanban-board')],
+});
+
+export const isDarkAtom = atom({
+  key: 'isDark',
+  default: false,
 });
