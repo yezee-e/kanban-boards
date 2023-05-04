@@ -101,7 +101,7 @@
 > 2.  `{[id:1,text:javascript],[id:2,text:java],[id:3,text:python]}` 도착 보드를 복사(카드가 옮겨갈 보드)
 > 3.  `[id:3,text:dog]` 이동할 배열을 찾는다(잡은카드)
 > 4.  `{[id:1,text:bear],[id:2,text:cat]}` splice(시작위치,1)함수로 객체에서 이동할 배열을 삭제시켜준뒤
-> 5.  ``{[id:0,text:dog],[id:1,text:javascript],[id:2,text:java],[id:3,text:python]}` ` splice(도착위치,0,이동할배열) 이동한 위치에 다시 넣어준다
+> 5.  `{[id:0,text:dog],[id:1,text:javascript],[id:2,text:java],[id:3,text:python]}` splice(도착위치,0,이동할배열) 이동한 위치에 다시 넣어준다
 > 6.  변경된 각각의 4번과 5번 보드를 변경되지 않은 보드들과 함께 다시 리턴해준다
 
 <br/>
