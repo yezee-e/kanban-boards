@@ -3,7 +3,8 @@
 > P에서 J가 되는 칸반보드  
 > **URL** https://talking-kanban-board.netlify.app/
 
-<img src="./public/pic/kanban.png"/>
+![](https://velog.velcdn.com/images/yezee/post/b6434c0c-8e11-40b2-8a73-cbb3f681077f/image.png)
+
 
 ## 1.참여인원
 
